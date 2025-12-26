@@ -71,9 +71,10 @@ FROM film;
 /* 
 11. Encuentra lo que costó el antepenúltimo alquiler ordenado por fecha.
 */
-SELECT amount, payment_date
-FROM payment
-ORDER BY payment_date DESC
+SELECT rental_id,
+       rental_date
+FROM rental
+ORDER BY rental_date DESC
 OFFSET 2 LIMIT 1;
 
 /* 
@@ -223,7 +224,12 @@ ORDER BY total_peliculas DESC;
 SELECT f.title,
        COUNT(i.inventory_id) AS cantidad_disponible
 FROM film f
-LEFT JOIN inventory i ON f.film_id = i.film_id
+LEFT JOIN inventory i 
+       ON f.film_id = i.film_id
+LEFT JOIN rental r 
+       ON i.inventory_id = r.inventory_id
+       AND r.return_date IS NULL
+WHERE r.rental_id IS NULL
 GROUP BY f.title
 ORDER BY cantidad_disponible DESC;
 
@@ -267,7 +273,9 @@ SELECT f.title,
        r.rental_id,
        r.rental_date
 FROM film f
-CROSS JOIN rental r;
+LEFT JOIN inventory i ON f.film_id = i.film_id
+LEFT JOIN rental r ON i.inventory_id = r.inventory_id
+ORDER BY f.title;
 
 /* 
 34. Encuentra los 5 clientes que más dinero se hayan gastado con nosotros.
@@ -607,3 +615,4 @@ FROM customer c
 LEFT JOIN rental r ON c.customer_id = r.customer_id
 GROUP BY c.customer_id
 ORDER BY total_alquileres DESC;
+
